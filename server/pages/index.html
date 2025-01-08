@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookly</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+            backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        input {
+            padding: 15px;
+            width: 100%;
+            max-width: 300px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #4dd0e1;
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(77, 208, 225, 0.2);
+        }
+        
+        button {
+            padding: 15px 30px;
+            background: #4dd0e1;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            background: #26c6da;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        button:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(100, 100);
+                opacity: 0;
+            }
+        }
+        
+        .clouds {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            animation: moveCloud 15s linear infinite;
+        }
+        
+        @keyframes moveCloud {
+            0% {
+                transform: translateX(100vw);
+            }
+            100% {
+                transform: translateX(-200px);
+            }
+        }
+        
+        .info-boxes {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(77, 208, 225, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .info-box:active {
+            transform: translateY(0);
+        }
+        
+        .info-box h2 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+        
+        .info-box p {
+            margin: 0;
+            color: #34495e;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            padding: 1rem;
+            background: #fde8e8;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            .info-box {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .arrow-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .arrow-button {
+            background: #4dd0e1;
+            border: none;
+            color: white;
+            font-size: 24px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .arrow-button:hover {
+            background: #26c6da;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .arrow-button:active {
+            transform: translateY(0);
+        }
+
+        .left-arrow {
+            padding: 10px 15px; /* Adjust width for left arrow */
+        }
+
+        .right-arrow {
+            padding: 10px 15px; /* Adjust width for right arrow */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="clouds" id="clouds"></div>
+    <div class="container">
+        <h1>Cookly</h1>
+        <input type="text" id="recipeInput" placeholder="What would you like to cook?" onkeypress="handleKeyPress(event)">
+        <button onclick="handleSubmit()" id="submitButton">Get Recipe</button>
+        <div id="error-message" class="error-message">
+            Connection Error to Cookly. Try again in a few seconds.
+        </div>
+        
+        <div class="info-boxes">
+            <div class="info-box" onclick="showBox(1)">
+                <h2 id="boxOne">Quick Recipes</h2>
+                <p>Click to open</p>
+            </div>
+            <div class="info-box" onclick="showBox(2)">
+                <h2 id="boxTwo">Meal Planning</h2>
+                <p>Click to open</p>
+            </div>
+            <div class="info-box" onclick="showBox(3)">
+                <h2 id="boxThree">Cooking Tips</h2>
+                <p>Click to open</p>
+            </div>
+        </div>
+        
+        <div class="arrow-navigation">
+            <button class="arrow-button left-arrow" onclick="navigateIndex(-1)">&#8592;</button>
+            <button class="arrow-button right-arrow" onclick="navigateIndex(1)">&#8594;</button>
+        </div>
+        
+    </div>
+
+    <script>
+        let index = 0;
+        let indexIds = ["LOADING", "LOADING", "LOADING"];
+
+        function showBox(number) {
+            console.log("Loading...")
+
+            if (indexIds[number - 1] == "BLANK") {
+                alert("No recipe is in this slot! Generate one to fill this slot up!")
+                return;
+            }
+
+            window.location.href = "/recipe?id=" + indexIds[number - 1];
+        }
+
+        function navigateIndex(huh) {
+            index += huh;
+
+            fetch("/api/recipe/list")
+                .then(res => {
+                    if (res.ok == false) {
+                        return new Error(res.text());
+                    }
+
+                    return res.text();
+                })
+                .then(data => {
+                    let results = JSON.parse(data);
+                    let resultsList = results.list;
+
+                    let boxOneContent = resultsList[index];
+                    let boxTwoContent = resultsList[index + 1];
+                    let boxThreeContent = resultsList[index + 2];
+
+                    
+
+                    if (boxOneContent == undefined) {
+                        boxOneContent = {
+                            "id" : "BLANK",
+                            "name" : "Nothing Here"
+                        }
+                    }
+
+                    if (boxTwoContent == undefined) {
+                        boxTwoContent = {
+                            "id" : "BLANK",
+                            "name" : "Nothing Here"
+                        }
+                    }
+
+                    if (boxThreeContent == undefined) {
+                        boxThreeContent = {
+                            "id" : "BLANK",
+                            "name" : "Nothing Here"
+                        }
+                    }
+
+                    document.getElementById("boxOne").innerText = boxOneContent.name;
+                    indexIds[0] = boxOneContent.id;
+
+                    document.getElementById("boxTwo").innerText = boxTwoContent.name;
+                    indexIds[1] = boxTwoContent.id;
+
+                    document.getElementById("boxThree").innerText = boxThreeContent.name;
+                    indexIds[2] = boxThreeContent.id;
+                })
+                .catch(err => {
+                    alert(err);
+                })
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                handleSubmit();
+            }
+        }
+
+        function setLoading(isLoading) {
+            const button = document.getElementById('submitButton');
+            if (isLoading) {
+                button.disabled = true;
+                button.innerHTML = 'Getting Recipe <span class="loading"></span>';
+            } else {
+                button.disabled = false;
+                button.innerHTML = 'Get Recipe';
+            }
+        }
+
+        function handleSubmit() {
+            const input = document.getElementById('recipeInput').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            if (!input.trim()) {
+                return;
+            }
+
+            setLoading(true);
+            errorMessage.classList.remove('visible');
+
+            fetch("/api/recipe/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ prompt: input })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+                return response.text();
+            })
+            .then(data => {
+                window.location.href = "/recipe?id=" + data;
+            })
+            .catch(err => {
+                errorMessage.classList.add('visible');
+                setLoading(false);
+            });
+        }
+
+        function createCloud() {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.top = Math.random() * 100 + '%';
+            cloud.style.width = (Math.random() * 100 + 50) + 'px';
+            cloud.style.height = (Math.random() * 30 + 20) + 'px';
+            
+            cloud.addEventListener('animationend', () => {
+                cloud.remove();
+            });
+            
+            return cloud;
+        }
+
+        function manageClouds() {
+            const cloudsContainer = document.getElementById('clouds');
+            
+            setInterval(() => {
+                cloudsContainer.appendChild(createCloud());
+            }, 3000);
+
+            for (let i = 0; i < 5; i++) {
+                const cloud = createCloud();
+                cloud.style.left = Math.random() * 100 + 'vw';
+                cloudsContainer.appendChild(cloud);
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            manageClouds();
+            navigateIndex(0);
+            document.getElementById('recipeInput').focus();
+        });
+    </script>
+</body>
+</html>

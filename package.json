@@ -1,0 +1,16 @@
+{
+  "name": "ai-cookery-rem",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Avery442",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "ollama": "^0.5.11"
+  }
+}

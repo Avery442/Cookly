@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookly - Recipe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .recipe-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem 3rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .clouds {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            animation: moveCloud 25s linear infinite;
+        }
+        @keyframes moveCloud {
+            0% {
+                transform: translateX(100vw);
+            }
+            100% {
+                transform: translateX(-200px);
+            }
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .recipe-content {
+            color: #34495e;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        .recipe-content h1,
+        .recipe-content h2,
+        .recipe-content h3 {
+            color: #2c3e50;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .recipe-content ul,
+        .recipe-content ol {
+            padding-left: 1.5em;
+        }
+        .recipe-content li {
+            margin: 0.5em 0;
+        }
+        .recipe-content code {
+            background: #f0f2f4;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .recipe-content blockquote {
+            border-left: 4px solid #4dd0e1;
+            margin: 1em 0;
+            padding-left: 1em;
+            color: #7f8c8d;
+        }
+        @keyframes complete {
+            0% {
+                box-shadow: 0 8px 32px rgba(39, 174, 96, 0.1);
+            }
+            50% {
+                box-shadow: 0 8px 32px rgba(39, 174, 96, 0.5);
+            }
+            100% {
+                box-shadow: 0 8px 32px rgba(39, 174, 96, 0.1);
+            }
+        }
+        .complete {
+            animation: complete 1s ease-in-out;
+            border: 2px solid #27ae60;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #4dd0e1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        .error-message {
+            color: #e74c3c;
+            padding: 1rem;
+            background: #fde8e8;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+        .error-message.visible {
+            display: block;
+        }
+        .loading-content {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        .return-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 12px 24px;
+            background: #4dd0e1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .return-button:hover {
+            background: #26c6da;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .return-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="clouds" id="clouds"></div>
+    <button class="return-button" onclick="window.location.href='/'">
+        ← Return to Generator
+    </button>
+    <div class="recipe-container">
+        <h1 id="recipe-title">Let us cook! <span class="loader"></span></h1>
+        <div class="error-message" id="error-message">
+            Failed to load recipe. Please try again later.
+        </div>
+        <div id="recipe-content" class="recipe-content loading-content">Loading...</div>
+    </div>
+
+    <script>
+        let isComplete = false;
+        let errorCount = 0;
+        const MAX_RETRIES = 3;
+
+        function LoadRecipe() {
+            const url = new URL(window.location.href);
+            const id = url.searchParams.get('id');
+            
+            if (isComplete) return;
+
+            fetch("/api/recipe/read?id=" + id)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(res.text());
+                    }
+                    return res.text();
+                })
+                .then(data => {
+                    const jsonData = JSON.parse(data);
+                    
+                    errorCount = 0;
+                    document.getElementById("error-message").classList.remove("visible");
+                    
+                    const title = jsonData.data.title?.trim();
+                    if (title) {
+                        document.getElementById("recipe-title").innerHTML = title;
+                    } else {
+                        document.getElementById("recipe-title").innerHTML = 'Loading... <span class="loader"></span>';
+                    }
+                    
+                    const content = jsonData.data.content?.trim();
+                    const contentElement = document.getElementById("recipe-content");
+                    if (content) {
+                        // Parse markdown content
+                        contentElement.innerHTML = marked.parse(content);
+                        contentElement.classList.remove("loading-content");
+                    } else {
+                        contentElement.innerHTML = "Loading...";
+                        contentElement.classList.add("loading-content");
+                    }
+                    
+                    if (jsonData.data.is_complete) {
+                        isComplete = true;
+                        document.querySelector('.recipe-container').classList.add('complete');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errorCount++;
+                    
+                    if (errorCount >= MAX_RETRIES) {
+                        document.getElementById("error-message").classList.add("visible");
+                        document.getElementById("recipe-title").innerHTML = 'Failed to Load <span style="color: #e74c3c;">⚠️</span>';
+                        isComplete = true;
+                    }
+                });
+        }
+
+        function LoopTime() {
+            if (!isComplete) {
+                setTimeout(() => {
+                    LoadRecipe();
+                    LoopTime();
+                }, 1500);
+            }
+        }
+
+        function createCloud() {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.top = Math.random() * 100 + '%';
+            cloud.style.width = (Math.random() * 100 + 50) + 'px';
+            cloud.style.height = (Math.random() * 30 + 20) + 'px';
+            
+            cloud.addEventListener('animationend', () => {
+                cloud.remove();
+            });
+            
+            return cloud;
+        }
+
+        function manageClouds() {
+            const cloudsContainer = document.getElementById('clouds');
+            
+            setInterval(() => {
+                cloudsContainer.appendChild(createCloud());
+            }, 5000);
+
+            for (let i = 0; i < 3; i++) {
+                const cloud = createCloud();
+                cloud.style.left = Math.random() * 100 + 'vw';
+                cloudsContainer.appendChild(cloud);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", (ev) => {
+            LoopTime();
+            manageClouds();
+        });
+    </script>
+</body>
+</html>
