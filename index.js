@@ -34,6 +34,9 @@ app.get("/api/recipe/list", (req, res) => {
     })
 })
 
+app.get("/pins", (req, res) => {
+    return res.status(200).sendFile(__dirname + "/server/pages/pinned.html");
+})
 
 app.get("/recipe", (req, res) => {
     return res.status(200).sendFile(__dirname + "/server/pages/recipe.html");

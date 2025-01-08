@@ -105,39 +105,6 @@
             color: #95a5a6;
             font-style: italic;
         }
-        .button-section {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        .button {
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .button:hover {
-            opacity: 0.8;
-        }
-        .pin-button {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background-color: #4caf50;
-            color: white;
-        }
-        .pin-icon {
-            width: 16px;
-            height: 16px;
-            fill: white;
-        }
-        .secondary-button {
-            background-color: #e0e0e0;
-            color: #2c3e50;
-        }
     </style>
 </head>
 <body>
@@ -148,101 +115,12 @@
             Failed to load recipe. Please try again later.
         </div>
         <p id="recipe-content" class="loading-content">Loading...</p>
-
-        <!-- Button Section -->
-        <div class="button-section">
-            <button class="button pin-button" id="pinbutton" onclick="pinCurRecipe()">
-                Loading...
-            </button>
-        </div>
     </div>
-
 
     <script>
         let isComplete = false;
-        let isLoaded = false;
         let errorCount = 0;
         const MAX_RETRIES = 3;
-
-        function updateButtonState() {
-            const url = new URL(window.location.href);
-            let data = localStorage.getItem("pinnedRecipes");
-            if (data == null) {
-                document.getElementById("pinbutton").innerText = "Pin";
-                return;
-            }
-
-            let jsonDataRecipe = JSON.parse(data);
-
-            let found = false;
-
-            let index = 0;
-            jsonDataRecipe.list.forEach(element => {
-                if (element.id == url.searchParams.get("id")) {
-                    jsonDataRecipe.list.splice(index, 1);
-                    found = true;
-                }
-
-                index += 1;
-            });
-
-            if (found) {
-                document.getElementById("pinbutton").innerText = "Unpin";
-            } else {
-                document.getElementById("pinbutton").innerText = "Pin";
-            }
-        }
-
-        function pinCurRecipe(proceed) {
-
-            if (isLoaded == false) {
-                console.log("Ah ah! Can't do that yet.");
-                return;
-            } 
-
-            if (isComplete == false) {
-                console.log("Ah ah! Can't do that yet.");
-                return;
-            } 
-
-            const url = new URL(window.location.href);
-            let data = localStorage.getItem("pinnedRecipes");
-            if (data == null) {
-                data = "{}";
-            }
-            let jsonDataRecipe = JSON.parse(data.toString());
-
-            if (jsonDataRecipe.list == undefined) {
-                jsonDataRecipe = {
-                    "list" : []
-                }
-                localStorage.setItem("pinnedRecipes", JSON.stringify(jsonDataRecipe));
-            }
-
-            let found = false;
-
-            let index = 0;
-            jsonDataRecipe.list.forEach(element => {
-                if (element.id == url.searchParams.get("id")) {
-                    jsonDataRecipe.list.splice(index, 1);
-                    found = true;
-                }
-
-                index += 1;
-            });
-
-            if (found == false) {
-                jsonDataRecipe.list.push({
-                    "id" : url.searchParams.get("id"),
-                    "name" : document.getElementById("recipe-title").innerText
-                })
-            }
-            
-            localStorage.setItem("pinnedRecipes", JSON.stringify(jsonDataRecipe));
-
-            updateButtonState();
-
-        }
 
         function LoadRecipe() {
             const url = new URL(window.location.href);
@@ -282,8 +160,6 @@
                         contentElement.innerText = "Loading...";
                         contentElement.classList.add("loading-content");
                     }
-
-                    isLoaded = true;
                     
                     // Check if recipe is complete
                     if (jsonData.data.is_complete) {
@@ -342,7 +218,6 @@
 
         document.addEventListener("DOMContentLoaded", (ev) => {
             LoopTime();
-            updateButtonState();
             manageClouds();
         });
     </script>

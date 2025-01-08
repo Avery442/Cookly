@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinned Recipes</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            overflow-x: hidden;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .box-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(77, 208, 225, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .box h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .box p {
+            color: #607d8b;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: #4dd0e1;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: #26c6da;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="/" class="nav-logo">COOKLY</a>
+    </div>
+
+    <div class="container">
+        <h1 id="user_notification_message"></h1>
+        <div class="box-container" id="boxContainer"></div>
+    </div>
+
+    <script>
+        let boxCounter = 0; // Separate counter for unique box IDs
+        let recipeDataIndex = [];
+
+
+
+        function createBox(titleStr) {
+            const boxContainer = document.getElementById('boxContainer');
+    
+            // Create box element
+            const box = document.createElement('div');
+            box.className = 'box';
+            box.id = `box-${boxCounter}`; // Assign a unique ID to the box
+            
+            // Add title to box
+            const title = document.createElement('h2');
+            title.textContent = titleStr; // Include the ID in the title
+            
+            // Add description text
+            const description = document.createElement('p');
+            description.textContent = 'Click this to open me!';
+            
+            // Append title and description to box
+            box.appendChild(title);
+            box.appendChild(description);
+            
+            // Add click event to the box
+            box.addEventListener('click', () => {
+                const boxId = box.id; // Get the box ID (e.g., "box-2")
+                const boxNumber = parseInt(boxId.split('-')[1], 10); // Extract the integer
+                                
+                window.location.href = "/recipe?id=" + recipeDataIndex[boxNumber]; 
+            });
+    
+            // Append box to container
+            boxContainer.appendChild(box);
+    
+            // Increment the unique box counter
+            boxCounter++;
+        }
+
+        function ExtractAndLoad() {
+            let data = localStorage.getItem("pinnedRecipes");
+            let jsonData = JSON.parse(data);
+
+            if (data == null) {
+                document.getElementById("user_notification_message").innerText = "No pinned recipes found! Pin a recipe and find them here!";
+                return;
+            }
+
+            if (jsonData.list.length == 0) {   
+                document.getElementById("user_notification_message").innerText = "No pinned recipes found! Pin a recipe and find them here!";
+
+            } else {
+                jsonData.list.forEach(element => {
+                    createBox(element.name);
+                    recipeDataIndex.push(element.id);     
+                });
+            }
+
+        }
+
+        document.addEventListener("DOMContentLoaded", (ev) => {
+            ExtractAndLoad();
+        })
+    </script>
+    
+</body>
+</html>

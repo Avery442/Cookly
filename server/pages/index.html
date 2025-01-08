@@ -5,6 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cookly</title>
     <style>
+
+        .navigation-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .arrow-button {
+            padding: 10px 20px;
+            background: #4dd0e1;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .arrow-button:hover {
+            background: #26c6da;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .arrow-button:active {
+            transform: translateY(0);
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -15,7 +45,74 @@
             font-family: Arial, sans-serif;
             overflow-x: hidden;
         }
-        
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transition: top 0.3s ease; /* Smooth transition for hiding and showing */
+            flex-wrap: wrap;
+        }
+
+        .nav-bar.hidden {
+            top: -100px; /* Move the navbar off-screen */
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .nav-options {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+            padding-right: 3rem;
+        }
+
+        .nav-link:hover {
+            color: #4dd0e1;
+        }
+
+        /* Mobile styling adjustments */
+        @media (max-width: 768px) {
+            .nav-options {
+                justify-content: center;
+                flex-direction: column; /* Stack items vertically */
+                gap: 1rem;
+            }
+
+            .nav-bar {
+                padding: 1rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem; /* Smaller font size on mobile */
+                text-align: center;
+            }
+
+            .nav-logo {
+                font-size: 1.2rem; /* Slightly smaller logo */
+            }
+        }
         .container {
             background: rgba(255, 255, 255, 0.9);
             padding: 2rem;
@@ -28,6 +125,7 @@
             backdrop-filter: blur(10px);
             width: 90%;
             max-width: 800px;
+            margin-top: 80px; /* Adjust for navbar height */
         }
 
         h1 {
@@ -35,14 +133,14 @@
             margin-bottom: 1.5rem;
             font-size: 2.5rem;
         }
-        
+
         @keyframes fadeInUp {
             to {
                 transform: translateY(0);
                 opacity: 1;
             }
         }
-        
+
         input {
             padding: 15px;
             width: 100%;
@@ -55,14 +153,14 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         input:focus {
             outline: none;
             border-color: #4dd0e1;
             transform: scale(1.02);
             box-shadow: 0 6px 12px rgba(77, 208, 225, 0.2);
         }
-        
+
         button {
             padding: 15px 30px;
             background: #4dd0e1;
@@ -76,46 +174,17 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         button:hover {
             background: #26c6da;
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
-        
+
         button:active {
             transform: translateY(0);
         }
-        
-        button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%);
-            transform-origin: 50% 50%;
-        }
-        
-        button:focus:not(:active)::after {
-            animation: ripple 1s ease-out;
-        }
-        
-        @keyframes ripple {
-            0% {
-                transform: scale(0, 0);
-                opacity: 0.5;
-            }
-            100% {
-                transform: scale(100, 100);
-                opacity: 0;
-            }
-        }
-        
+
         .clouds {
             position: fixed;
             width: 100%;
@@ -123,14 +192,14 @@
             pointer-events: none;
             z-index: -1;
         }
-        
+
         .cloud {
             position: absolute;
             background: rgba(255, 255, 255, 0.8);
             border-radius: 50px;
             animation: moveCloud 15s linear infinite;
         }
-        
+
         @keyframes moveCloud {
             0% {
                 transform: translateX(100vw);
@@ -139,7 +208,7 @@
                 transform: translateX(-200px);
             }
         }
-        
+
         .info-boxes {
             display: flex;
             gap: 20px;
@@ -147,7 +216,7 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-        
+
         .info-box {
             background: rgba(255, 255, 255, 0.8);
             padding: 20px;
@@ -157,41 +226,11 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .info-box:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(77, 208, 225, 0.2);
             background: rgba(255, 255, 255, 0.9);
-        }
-        
-        .info-box:active {
-            transform: translateY(0);
-        }
-        
-        .info-box h2 {
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-            font-size: 1.2rem;
-        }
-        
-        .info-box p {
-            margin: 0;
-            color: #34495e;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            padding: 1rem;
-            background: #fde8e8;
-            border-radius: 8px;
-            margin: 1rem 0;
-            display: none;
-        }
-
-        .error-message.visible {
-            display: block;
         }
 
         @media (max-width: 768px) {
@@ -208,74 +247,27 @@
             h1 {
                 font-size: 2rem;
             }
-        }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+            .nav-options {
+                flex-direction: column;
+                gap: 0.5rem;
             }
         }
-
-        .arrow-navigation {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .arrow-button {
-            background: #4dd0e1;
-            border: none;
-            color: white;
-            font-size: 24px;
-            padding: 10px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .arrow-button:hover {
-            background: #26c6da;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .arrow-button:active {
-            transform: translateY(0);
-        }
-
-        .left-arrow {
-            padding: 10px 15px; /* Adjust width for left arrow */
-        }
-
-        .right-arrow {
-            padding: 10px 15px; /* Adjust width for right arrow */
-        }
-
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <a href="/" class="nav-logo">COOKLY</a>
+        <div class="nav-options">
+            <a href="/pins" class="nav-link">Pinned Recipes</a>
+        </div>
+    </div>
+
     <div class="clouds" id="clouds"></div>
     <div class="container">
-        <h1>Cookly</h1>
         <input type="text" id="recipeInput" placeholder="What would you like to cook?" onkeypress="handleKeyPress(event)">
         <button onclick="handleSubmit()" id="submitButton">Get Recipe</button>
-        <div id="error-message" class="error-message">
-            Connection Error to Cookly. Try again in a few seconds.
-        </div>
-        
+        <div id="error-message" class="error-message" style="visibility: hidden;"></div>
         <div class="info-boxes">
             <div class="info-box" onclick="showBox(1)">
                 <h2 id="boxOne">Quick Recipes</h2>
@@ -291,12 +283,48 @@
             </div>
         </div>
         
-        <div class="arrow-navigation">
-            <button class="arrow-button left-arrow" onclick="navigateIndex(-1)">&#8592;</button>
-            <button class="arrow-button right-arrow" onclick="navigateIndex(1)">&#8594;</button>
+        <!-- Arrow Navigation Section -->
+        <div class="navigation-buttons">
+            <button class="arrow-button" onclick="navigateIndex(-1)">&#8592; </button>
+            <button class="arrow-button" onclick="navigateIndex(1)">&#8594;</button>
         </div>
         
     </div>
+
+
+    <script>
+        let timeout;
+    
+        // Function to reset the timer when there is any user interaction
+        function resetInactivityTimer() {
+            clearTimeout(timeout); // Clear the previous timer
+            timeout = setTimeout(hideNavBar, 1200); // Hide nav bar after 3 seconds of inactivity
+            showNavBar(); // Ensure the nav bar is visible when user interacts
+        }
+    
+        // Function to hide the nav bar
+        function hideNavBar() {
+            const navBar = document.querySelector('.nav-bar');
+            navBar.classList.add('hidden');
+        }
+    
+        // Function to show the nav bar
+        function showNavBar() {
+            const navBar = document.querySelector('.nav-bar');
+            navBar.classList.remove('hidden');
+        }
+    
+        // Add event listeners to detect user interaction
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keydown', resetInactivityTimer);
+        document.addEventListener('touchstart', resetInactivityTimer); // Mobile support
+    
+        // Initialize the inactivity timer on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            resetInactivityTimer(); // Start the inactivity timer
+        });
+    </script>
+    
 
     <script>
         let index = 0;
@@ -315,6 +343,10 @@
 
         function navigateIndex(huh) {
             index += huh;
+
+            if (index < 0) {
+                index = 0;
+            }
 
             fetch("/api/recipe/list")
                 .then(res => {
@@ -395,7 +427,6 @@
             }
 
             setLoading(true);
-            errorMessage.classList.remove('visible');
 
             fetch("/api/recipe/create", {
                 method: "POST",
@@ -416,7 +447,7 @@
                 window.location.href = "/recipe?id=" + data;
             })
             .catch(err => {
-                errorMessage.classList.add('visible');
+                errorMessage.innerText = "Connection Error to Cookly. Try again in a few seconds.";
                 setLoading(false);
             });
         }
