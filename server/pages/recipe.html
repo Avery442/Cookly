@@ -145,7 +145,7 @@
     <div class="recipe-container">
         <h1 id="recipe-title">Let us cook! <span class="loader"></span></h1>
         <div class="error-message" id="error-message">
-            Failed to load recipe. Please try again later.
+            LOADING
         </div>
         <p id="recipe-content" class="loading-content">Loading...</p>
 
@@ -162,7 +162,20 @@
         let isComplete = false;
         let isLoaded = false;
         let errorCount = 0;
-        const MAX_RETRIES = 3;
+
+        const errorMessages = [
+            "The waitress dropped the recipe into a puddle. - Please try again.",
+            "Someone dined and dashed! The waiter rushed to prevent the dasher instead of giving the recipe to you. - Please Try Again",
+            "You asked for the recipe and nobody responded... 10/10 Customer Service am I right? - Please Try Again",
+            "The waiter told you to get down and give him 10 pushups. As a frequent customer; you failed to do so. - Please try again"
+        ];
+
+        const MAX_RETRIES = 2;
+        let retries = 0;
+
+        function randomizeErrorMessage() {
+            document.getElementById("error-message").innerText = errorMessages[Math.floor(Math.random() * (errorMessages.length - 1 - 0) + 0)];
+        }
 
         function updateButtonState() {
             const url = new URL(window.location.href);
@@ -262,8 +275,18 @@
                     
                     // Reset error count on successful fetch
                     errorCount = 0;
-                    document.getElementById("error-message").classList.remove("visible");
                     
+                    if (jsonData.success == true) {
+                        document.getElementById("error-message").classList.remove("visible");
+                    }  else {
+                        if (retries == MAX_RETRIES) {
+                            document.getElementById("error-message").classList.add("visible");
+                            randomizeErrorMessage();
+                        } else if (retries > MAX_RETRIES) return;
+                        retries += 1;
+                    
+                    }
+
                     // Update title if not empty
                     const title = jsonData.data.title?.trim();
                     if (title) {
