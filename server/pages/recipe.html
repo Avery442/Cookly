@@ -163,6 +163,8 @@
         let isLoaded = false;
         let errorCount = 0;
 
+        let waitTimeBeforeLoop = 1500;
+
         const errorMessages = [
             "The waitress dropped the recipe into a puddle. - Please try again.",
             "Someone dined and dashed! The waiter rushed to prevent the dasher instead of giving the recipe to you. - Please Try Again",
@@ -331,7 +333,7 @@
                 setTimeout(() => {
                     LoadRecipe();
                     LoopTime();
-                }, 1500);
+                }, waitTimeBeforeLoop);
             }
         }
 
@@ -363,8 +365,35 @@
             }
         }
 
+        function FetchLoadTime() {
+            return new Promise((resolve, reject) => {
+                fetch("/api/client")
+                    .then(response => {
+                        if (response.ok == false) {
+                            return new Error(response.text());
+                        }
+
+                        return response.text();
+                    })
+                    .then(data => {
+                        const jsonData = JSON.parse(data);
+
+                        waitTimeBeforeLoop = jsonData.refreshGenerationCheckMiliseconds;
+                        
+                        console.log(waitTimeBeforeLoop + " - Refresh Generation Query Check Miliseconds Duration")
+
+                        resolve("Success");
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+            })
+        }
+
         document.addEventListener("DOMContentLoaded", (ev) => {
-            LoopTime();
+            FetchLoadTime().then(data => {
+                LoopTime();
+            })
             updateButtonState();
             manageClouds();
         });

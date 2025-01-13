@@ -259,6 +259,7 @@
     <div class="nav-bar">
         <a href="/" class="nav-logo">COOKLY</a>
         <div class="nav-options">
+            <a href="/status" class="nav-link">Status</a>
             <a href="/pins" class="nav-link">Pinned Recipes</a>
         </div>
     </div>
@@ -289,6 +290,8 @@
             <button class="arrow-button" onclick="navigateIndex(1)">&#8594;</button>
         </div>
         
+        <h6 id="clientPacketText">Loading Client Packet.</h6>
+
     </div>
 
 
@@ -330,7 +333,25 @@
         let index = 0;
         let indexIds = ["LOADING", "LOADING", "LOADING"];
 
-        function showBox(number) {
+        function LoadClientPacket() {
+            fetch("/api/client")
+                .then(response => {
+                    if (!response.ok) {
+                        return new Error(response.text());
+                    }
+
+                    return response.text();
+                })
+                .then(data => {
+                    const jsonData = JSON.parse(data);
+                    document.getElementById("clientPacketText").innerText = "Version: " + jsonData.version + " - Status: " + jsonData.status;
+                })
+                .catch(err => {
+                    document.getElementById("clientPacketText").innerText = "Server Error! " + err;
+                })
+        }
+
+        function showBox(number) { // Loads the recipe based off the box you click.
             console.log("Loading...")
 
             if (indexIds[number - 1] == "BLANK") {
@@ -340,6 +361,7 @@
 
             window.location.href = "/recipe?id=" + indexIds[number - 1];
         }
+
 
         function navigateIndex(huh) {
             index += huh;
@@ -407,18 +429,45 @@
             }
         }
 
-        function setLoading(isLoading) {
-            const button = document.getElementById('submitButton');
-            if (isLoading) {
-                button.disabled = true;
-                button.innerHTML = 'Getting Recipe <span class="loading"></span>';
-            } else {
-                button.disabled = false;
-                button.innerHTML = 'Get Recipe';
+
+        function handleSubmit_trySearch() {
+            const input = document.getElementById('recipeInput').value;
+
+            if (input.length < 3) {
+                alert("Please enter something before you generate!");
+                return;
             }
+
+            fetch("/api/recipe/search?input=" + input)
+                .then(response => {
+                    if (response.ok == false) {
+                        return new Error(response.text());
+                    }
+
+                    return response.text();
+                })
+                .then(data => {
+                    const jsonData = JSON.parse(data);
+
+                    if (jsonData.searchResults.length != 0) {
+                        localStorage.setItem("searchResults", data);
+                        localStorage.setItem("searchPromptTransfer", input);
+               
+                        console.log(data);
+
+                        window.location.href = "/recipe/approval"
+                    } else {
+                        console.log("Nothing found!");
+                        handleSubmit_beginGeneration();
+                    }
+                })
+                .catch(err => {
+                    alert("Error whilst searching! Generating anyway.");
+                    handleSubmit_beginGeneration();
+                })
         }
 
-        function handleSubmit() {
+        function handleSubmit_beginGeneration() {
             const input = document.getElementById('recipeInput').value;
             const errorMessage = document.getElementById('error-message');
             
@@ -426,7 +475,7 @@
                 return;
             }
 
-            setLoading(true);
+   
 
             fetch("/api/recipe/create", {
                 method: "POST",
@@ -448,8 +497,12 @@
             })
             .catch(err => {
                 errorMessage.innerText = "Connection Error to Cookly. Try again in a few seconds.";
-                setLoading(false);
+                
             });
+        }
+
+        function handleSubmit() {
+            handleSubmit_trySearch();
         }
 
         function createCloud() {
@@ -482,6 +535,7 @@
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
+            LoadClientPacket();
             manageClouds();
             navigateIndex(0);
             document.getElementById('recipeInput').focus();

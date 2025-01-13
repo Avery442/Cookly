@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookly Status</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            animation: fadeInUp 0.6s ease forwards;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        p {
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1.2rem;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .status.error {
+            color: #e57373;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #4dd0e1;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: #26c6da;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cookly Status</h1>
+        <div id="status" class="status">Loading...</div>
+    </div>
+
+    <script>
+
+        function fetchStatusLoop() {
+            setTimeout(() => {
+                fetchStatus();
+                fetchStatusLoop();
+            }, 3000);
+        }
+
+        function fetchStatus() {
+            const statusElement = document.getElementById('status');
+            
+            statusElement.classList.remove('error');
+
+            fetch('/api/client')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch status.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    statusElement.innerHTML = "<b>Internal System:</b><br>Current Status: " + data.status + `<br>Development Version: ` + data.version + "<br><br><b>Generation:</b><br>Current Generation Refresh Rate: " + data.refreshGenerationCheckMiliseconds + "ms";
+                })
+                .catch(error => {
+                    console.error(error);
+                    statusElement.textContent = 'Error fetching status!';
+                    statusElement.classList.add('error');
+                });
+        }
+
+        // Automatically fetch status on page load
+        document.addEventListener('DOMContentLoaded', (ev) => {
+       
+            fetchStatusLoop();
+        });
+    </script>
+</body>
+</html>

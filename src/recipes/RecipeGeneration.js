@@ -84,11 +84,11 @@ async function srv_BeginGeneration(id, prompt) {
         "messages" : [
             {
                 "role" : "system",
-                "content" : "You will be given a cooking recipe. Your job is to create a title for it. Some rules to follow: DO NOT USE MARKDOWN, DO NOT PLACE TITLE IN QUOTES. You do this and NOTHING else."
+                "content" : "You will be given a prompt. Your job is to generate a title for the prompt ensure it can easily be linked to the prompt provided. For example: Egg Fried Rice - Your output should have Egg Fried Rice somewhere in the title. You do NOT use markdown and you do NOT place titles in quotes."
             },
             {
                 "role" : "user",
-                "content" : recipeData.content
+                "content" : prompt
             }
         ]
     })
