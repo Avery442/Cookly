@@ -80,6 +80,6 @@ app.get("/", (req, res) => {
     return res.status(200).sendFile(__dirname + "/server/pages/index.html");
 })
 
-app.listen(8080, () => {
+app.listen(8002, () => {
     console.log("Server listenoing on port 8080")
 })
