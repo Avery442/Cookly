@@ -170,6 +170,33 @@
     </div>
 
 
+    <script>
+        const url = new URL(window.location.href);
+        
+        if (localStorage.getItem("hasAgreedToTOS") == undefined) {
+            window.location.href = "/agreement?ref=/recipe?id=" + url.searchParams.get("id") ;
+
+        } else {
+            fetch('/api/tos')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load TOS');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    let tosData = JSON.parse(data);
+                    let versionACcepted = localStorage.getItem("hasAgreedToTOS_ver")
+                    if (tosData.version != versionACcepted) {
+                        window.location.href = "/agreement?ref=/recipe?id=" + url.searchParams.get("id") 
+                    }
+                })
+                .catch(err => {
+                    // ONE MIN
+                });
+        }
+    </script>
+
 
 
     <script>

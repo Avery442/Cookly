@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service - Cookly</title>
+    <title>Disclaimer - Cookly</title>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -141,7 +141,7 @@
     </div>
 
     <div class="container">
-        <h1>Terms of Service</h1>
+        <h1>Disclaimer</h1>
         <div class="tos-content" id="tosContent">
             <p>Loading...</p>
         </div>
@@ -149,37 +149,48 @@
     </div>
 
     <script>
-        let tosData;
+    // Function to get query parameters
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
 
-        // Load the TOS content from the /api/tos endpoint
-        function loadTOS() {
-            fetch('/api/tos')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to load TOS');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    tosData = JSON.parse(data);
-                    document.getElementById('tosContent').innerHTML = tosData.text;
-                })
-                .catch(err => {
-                    document.getElementById('tosContent').innerText = 'Error loading Terms of Service. Please try again later.';
-                });
-        }
+    let tosData;
+    let refParam;
 
-        // Function to handle user accepting the TOS
-        function acceptTOS() {
-            localStorage.setItem('hasAgreedToTOS', 'true');
-            localStorage.setItem("hasAgreedToTOS_ver", tosData.version);
-            window.location.href = '/';  // Redirect to the home page after accepting
-        }
+    // Load the TOS content from the /api/tos endpoint
+    function loadTOS() {
+        fetch('/api/tos')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load TOS');
+                }
+                return response.text();
+            })
+            .then(data => {
+                tosData = JSON.parse(data);
+                document.getElementById('tosContent').innerHTML = tosData.text;
+            })
+            .catch(err => {
+                document.getElementById('tosContent').innerText = 'Error loading Terms of Service. Please try again later.';
+            });
+    }
 
-        // Initialize page on load
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTOS();  // Load the Terms of Service content when the page is loaded
-        });
+    // Function to handle user accepting the TOS
+    function acceptTOS() {
+        localStorage.setItem('hasAgreedToTOS', 'true');
+        localStorage.setItem("hasAgreedToTOS_ver", tosData.version);
+
+        // Redirect to the value of the ref parameter or default to "/"
+        window.location.href = refParam ? refParam : '/';
+    }
+
+    // Initialize page on load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTOS();  // Load the Terms of Service content when the page is loaded
+        refParam = getQueryParam('ref');  // Store the value of the ref query parameter
+    });
+
     </script>
 </body>
 </html>

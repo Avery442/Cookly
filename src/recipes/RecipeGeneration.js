@@ -124,6 +124,39 @@ async function srv_BeginGeneration(id, prompt) {
 
 }
 
+async function DescribeImage(img) {
+    return new Promise(async (resolve, reject) => {
+        fs.exists(img, async (e) => {
+            if (e) {
+                const imageDescribeAgent = await ollama.chat({
+                    "model" : "llama3.2",
+                    "messages" : [
+                        {
+                            "role" : "system",
+                            "content" : "Your job is to identify the meal that is in this image. For Example: A user uploads a picture of a carrot cake. You respond with 'Carrot Cake that has chunks of carrot spread around neatly across the top of the cake. The cake is incased in a vanilla icing'. Make sure descriptions are of that level. DO NOT IDENTIFY THE BACKGROUND OF THE IMAGE. You do nothing else. You keep your responses brief and containing only essential information. In the event that the image has no dish or cannot be identified simply respond with 'NONE' and nothing else."
+                        },
+                        {
+                            "role" : "user",
+                            "images" : [img]
+                        }
+                    ]
+                })
+
+                fs.rm(img, (err) => {
+                    if (err) {
+                        reject(err.message);
+                    } else {
+                        resolve(imageDescribeAgent.message.content);
+                    }
+                });
+                
+            } else {
+                reject("Image not found.");
+            }
+        })
+    })
+}
+
 async function EditRecipeName(id, newName) {
     return new Promise(async (resolve, reject) => {
         const filePath = path.join(dirname, "server", "recipes", `${id}.json`);
@@ -155,5 +188,6 @@ async function EditRecipeName(id, newName) {
 
 module.exports = {
     CreateRecipe,
-    EditRecipeName
+    EditRecipeName,
+    DescribeImage
 }

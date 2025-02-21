@@ -14,6 +14,21 @@ const app = express();
 // app.use(helmet());
 app.use(express.json());
 
+const multer = require('multer');
+
+// Configure Multer for file storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, __dirname + '/server/vision/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+
 
 
 app.get("/api/client", (req, res) => {
@@ -58,6 +73,7 @@ app.get("/api/recipe/list", (req, res) => {
         return res.status(500).send(err);
     })
 })
+
 
 app.get("/agreement", (req, res) => {
     return res.status(200).sendFile(__dirname + "/server/pages/agreement.html");
