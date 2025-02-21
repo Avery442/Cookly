@@ -334,6 +334,31 @@
     </script>
 
     <script>
+        if (localStorage.getItem("hasAgreedToTOS") == undefined) {
+            window.location.href = "/agreement";
+
+        } else {
+            fetch('/api/tos')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load TOS');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    let tosData = JSON.parse(data);
+                    let versionACcepted = localStorage.getItem("hasAgreedToTOS_ver")
+                    if (tosData.version != versionACcepted) {
+                        window.location.href = "/agreement";
+                    }
+                })
+                .catch(err => {
+                    // ONE MIN
+                });
+        }
+    </script>
+
+    <script>
         let index = 0;
         let oldResults = [];
         let indexIds = ["LOADING", "LOADING", "LOADING"];
