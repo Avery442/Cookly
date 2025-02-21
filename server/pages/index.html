@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cookly</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
     <style>
 
         .navigation-buttons {
@@ -267,20 +272,20 @@
     <div class="clouds" id="clouds"></div>
     <div class="container">
         <input type="text" id="recipeInput" placeholder="What would you like to cook?" onkeypress="handleKeyPress(event)">
-        <button onclick="handleSubmit()" id="submitButton">Get Recipe</button>
+        <button onclick="handleSubmit()" id="submitButton">Create</button>
         <div id="error-message" class="error-message" style="visibility: hidden;"></div>
         <div class="info-boxes">
             <div class="info-box" onclick="showBox(1)">
                 <h2 id="boxOne">Quick Recipes</h2>
-                <p>Click to open</p>
+                <p id="boxOne_slogan">Click to open</p>
             </div>
             <div class="info-box" onclick="showBox(2)">
                 <h2 id="boxTwo">Meal Planning</h2>
-                <p>Click to open</p>
+                <p id="boxTwo_slogan">Click to open</p>
             </div>
             <div class="info-box" onclick="showBox(3)">
                 <h2 id="boxThree">Cooking Tips</h2>
-                <p>Click to open</p>
+                <p id="boxThree_slogan">Click to open</p>
             </div>
         </div>
         
@@ -327,10 +332,10 @@
             resetInactivityTimer(); // Start the inactivity timer
         });
     </script>
-    
 
     <script>
         let index = 0;
+        let oldResults = [];
         let indexIds = ["LOADING", "LOADING", "LOADING"];
 
         function LoadClientPacket() {
@@ -344,6 +349,37 @@
                 })
                 .then(data => {
                     const jsonData = JSON.parse(data);
+
+                    if (localStorage.getItem("visitedBefore") != "1") {                            
+                        Toastify({
+                                text: "Welcome to Cookly!",
+                                duration: 1550,
+                                close: true,
+                                gravity: "top", // `top` or `bottom`
+                                position: "right", // `left`, `center` or `right`
+                                stopOnFocus: true, // Prevents dismissing of toast on hover
+                                style: {
+                                    background: "linear-gradient(to right, #00b09b, #96c93d)",
+                                },
+                                onClick: function(){} // Callback after click
+                        }).showToast();    
+                        localStorage.setItem("visitedBefore", "1");
+                    } else {
+                        Toastify({
+                                text: "Welcome Back!",
+                                duration: 1550,
+                                close: true,
+                                gravity: "top", // `top` or `bottom`
+                                position: "right", // `left`, `center` or `right`
+                                stopOnFocus: true, // Prevents dismissing of toast on hover
+                                style: {
+                                    background: "linear-gradient(to right, #00b09b, #96c93d)",
+                                },
+                                onClick: function(){} // Callback after click
+                        }).showToast();    
+                    }
+
+
                     document.getElementById("clientPacketText").innerText = "Version: " + jsonData.version + " - Status: " + jsonData.status;
                 })
                 .catch(err => {
@@ -381,6 +417,24 @@
                 .then(data => {
                     let results = JSON.parse(data);
                     let resultsList = results.list;
+                    
+                    if (resultsList.length > oldResults.length && oldResults.length > 0) {  
+                        Toastify({
+                                text: "A new recipe has been created - Click to view!",
+                                destination: "/recipe?id=" + resultsList[resultsList.length - 1].id,
+                                duration: 8000,
+                                close: true,
+                                gravity: "top", // `top` or `bottom`
+                                position: "right", // `left`, `center` or `right`
+                                stopOnFocus: true, // Prevents dismissing of toast on hover
+                                style: {
+                                    background: "linear-gradient(to right, #2525FF, #22CCFF)",
+                                },
+                                onClick: function(){} // Callback after click
+                        }).showToast();   
+                    }
+
+                    oldResults = resultsList;
 
                     let boxOneContent = resultsList[index];
                     let boxTwoContent = resultsList[index + 1];
@@ -391,31 +445,37 @@
                     if (boxOneContent == undefined) {
                         boxOneContent = {
                             "id" : "BLANK",
-                            "name" : "Nothing Here"
+                            "name" : "Nothing Here",
+                            "slogan" : "Well your trying to open me? Good luck with that."
                         }
                     }
 
                     if (boxTwoContent == undefined) {
                         boxTwoContent = {
                             "id" : "BLANK",
-                            "name" : "Nothing Here"
+                            "name" : "Nothing Here",
+                            "slogan" : "Well your trying to open me? Good luck with that."
                         }
                     }
 
                     if (boxThreeContent == undefined) {
                         boxThreeContent = {
                             "id" : "BLANK",
-                            "name" : "Nothing Here"
+                            "name" : "Nothing Here",
+                            "slogan" : "Well your trying to open me? Good luck with that."
                         }
                     }
 
                     document.getElementById("boxOne").innerText = boxOneContent.name;
+                    document.getElementById("boxOne_slogan").innerText = boxOneContent.slogan;
                     indexIds[0] = boxOneContent.id;
 
                     document.getElementById("boxTwo").innerText = boxTwoContent.name;
+                    document.getElementById("boxTwo_slogan").innerText = boxTwoContent.slogan;
                     indexIds[1] = boxTwoContent.id;
 
                     document.getElementById("boxThree").innerText = boxThreeContent.name;
+                    document.getElementById("boxThree_slogan").innerText = boxThreeContent.slogan;
                     indexIds[2] = boxThreeContent.id;
                 })
                 .catch(err => {
@@ -429,6 +489,17 @@
             }
         }
 
+        function LoopTime() {
+            setTimeout(() => {
+                navigateIndex(0);
+                LoopTime();
+            }, 3500)
+        }
+
+        function handleSupriseMe() {
+            document.getElementById('recipeInput').value = "Surprise Me";
+            handleSubmit();
+        }
 
         function handleSubmit_trySearch() {
             const input = document.getElementById('recipeInput').value;
@@ -496,8 +567,19 @@
                 window.location.href = "/recipe?id=" + data;
             })
             .catch(err => {
-                errorMessage.innerText = "Connection Error to Cookly. Try again in a few seconds.";
-                
+                // errorMessage.innerText = "Connection Error to Cookly. Try again in a few seconds.";
+                Toastify({
+                            text: "There was an error connecting to Cookly's generation agent. Try again in a few seconds.",
+                            duration: 3500,
+                            close: true,
+                            gravity: "top", // `top` or `bottom`
+                            position: "right", // `left`, `center` or `right`
+                            stopOnFocus: true, // Prevents dismissing of toast on hover
+                            style: {
+                                background: "linear-gradient(to right, #FF0000, #FFCCCC)",
+                            },
+                            onClick: function(){} // Callback after click
+                }).showToast();    
             });
         }
 
@@ -538,6 +620,7 @@
             LoadClientPacket();
             manageClouds();
             navigateIndex(0);
+            LoopTime();
             document.getElementById('recipeInput').focus();
         });
     </script>

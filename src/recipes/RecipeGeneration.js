@@ -9,6 +9,7 @@ const dirname = path.join(__dirname, "..", "..");
 const defaultRecipeJson = {
     "title" : "",
     "content" : "",
+    "slogan" : "",
     "is_complete" : false
 }
 
@@ -96,7 +97,24 @@ async function srv_BeginGeneration(id, prompt) {
     recipeData.title = title_agent.message.content;
     recipeData.is_complete = true;
 
-    require('./TotalIndex').AppendToList(id, recipeData.title);
+    const slogan_agent = await ollama.chat({
+        "model" : "llama3.2",
+        "messages" : [
+            {
+                "role" : "system",
+                "content" : "Your job is to create a slogan such as 'A cookie to fix your hunger'. Use the provided text by the user to create this. DO THIS ONLY, CREATE ONE SLOGAN AND THATS IT."
+            },
+            {
+                "role" : "user",
+                "content" : title_agent.message.content
+            }
+        ]
+    })
+
+    recipeData.slogan = slogan_agent.message.content;
+    
+
+    require('./TotalIndex').AppendToList(id, recipeData.title, recipeData.slogan);
 
     fs.writeFile(dirname + "/server/recipes/" + id + ".json", JSON.stringify(recipeData), (err) => {
         if (err) {
@@ -106,6 +124,36 @@ async function srv_BeginGeneration(id, prompt) {
 
 }
 
+async function EditRecipeName(id, newName) {
+    return new Promise(async (resolve, reject) => {
+        const filePath = path.join(dirname, "server", "recipes", `${id}.json`);
+
+        try {
+            // Check if the file exists
+            await fs.promises.access(filePath);
+    
+            // Read the existing file content
+            let recipeData = await fs.promises.readFile(filePath, 'utf-8');
+            recipeData = JSON.parse(recipeData);
+    
+            // Update the title
+            recipeData.title = newName;
+    
+            // Save the updated content
+            await fs.promises.writeFile(filePath, JSON.stringify(recipeData, null, 4));
+            console.log(`Recipe title updated to: ${newName}`);
+            resolve("Success");
+        } catch (err) {
+            console.error(`Error updating recipe title: ${err.message}`);
+            reject(err);
+        }
+    })
+}
+
+
+
+
 module.exports = {
-    CreateRecipe
+    CreateRecipe,
+    EditRecipeName
 }

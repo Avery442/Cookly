@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <title>Cookly - Recipe</title>
     <style>
         body {
@@ -155,7 +159,17 @@
                 Loading...
             </button>
         </div>
+
+        <!-- Input for changing recipe name -->
+        <div class="button-section">
+            <input type="text" id="new-recipe-name" class="button" placeholder="New Recipe Name">
+            <button class="button" id="change-recipe-name-button" onclick="changeRecipeName()">
+                Change Name
+            </button>
+        </div>
     </div>
+
+
 
 
     <script>
@@ -172,14 +186,200 @@
             "The waiter told you to get down and give him 10 pushups. As a frequent customer; you failed to do so. - Please try again"
         ];
 
+        function changeRecipeName() {
+    const newName = document.getElementById("new-recipe-name").value;
+    if (!newName.trim()) {
+        Toastify({
+                        text: "Please enter a valid name.",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                        },
+                        onClick: function() {}
+        }).showToast();
+        return;
+    }
+
+    const url = new URL(window.location.href);
+    const recipeId = url.searchParams.get("id");
+
+    // Send the POST request to change the name
+    fetch("/api/recipe/edit_name", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: recipeId,
+                    name: newName
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the recipe title
+                    document.getElementById("recipe-title").innerText = newName;
+
+                    // Show success notification
+                    Toastify({
+                        text: "Recipe name changed successfully!",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "right", // `left`, `center`, or `right`
+                        stopOnFocus: true, // Prevents dismissing of toast on hover
+                        style: {
+                            background: "linear-gradient(to right, #00b09b, #96c93d)",
+                        },
+                        onClick: function() {} // Callback after click
+                    }).showToast();
+                } else {
+                    // Show failure notification
+                    Toastify({
+                        text: "Failed to change recipe name. Try again.",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                        },
+                        onClick: function() {}
+                    }).showToast();
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                Toastify({
+                    text: "Error while changing recipe name. Please try again.",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                    },
+                    onClick: function() {}
+                }).showToast();
+            });
+        }
+
+
+        function changeRecipeName() {
+            const newName = document.getElementById("new-recipe-name").value;
+            if (!newName.trim()) {
+                Toastify({
+                        text: "Please enter a valid name.",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                        },
+                        onClick: function() {}
+                    }).showToast();
+                return;
+            }
+
+            const url = new URL(window.location.href);
+            const recipeId = url.searchParams.get("id");
+
+            // Send the POST request to change the name
+            fetch("/api/recipe/edit_name", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: recipeId,
+                    name: newName
+                })
+            })
+            .then(res => res.text())
+            .then(data => {
+                if (data) {
+                    // Update the recipe title
+                    document.getElementById("recipe-title").innerText = newName;
+
+                    // Show success notification
+                    Toastify({
+                        text: "Recipe name changed successfully!",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "right", // `left`, `center`, or `right`
+                        stopOnFocus: true, // Prevents dismissing of toast on hover
+                        style: {
+                            background: "linear-gradient(to right, #00b09b, #96c93d)",
+                        },
+                        onClick: function() {} // Callback after click
+                    }).showToast();
+                } else {
+                    // Show failure notification
+                    Toastify({
+                        text: "Failed to change recipe name. Try again.",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                        },
+                        onClick: function() {}
+                    }).showToast();
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                Toastify({
+                    text: "Error while changing recipe name. Please try again.",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                    },
+                    onClick: function() {}
+                }).showToast();
+            });
+        }
+
+
         const MAX_RETRIES = 2;
         let retries = 0;
 
         function randomizeErrorMessage() {
-            document.getElementById("error-message").innerText = errorMessages[Math.floor(Math.random() * (errorMessages.length - 1 - 0) + 0)];
+            Toastify({
+                            text: errorMessages[Math.floor(Math.random() * (errorMessages.length - 1 - 0) + 0)],
+                            duration: 3500,
+                            close: true,
+                            gravity: "top", // `top` or `bottom`
+                            position: "right", // `left`, `center` or `right`
+                            stopOnFocus: true, // Prevents dismissing of toast on hover
+                            style: {
+                                background: "linear-gradient(to right, #FF0000, #FFCCCC)",
+                            },
+                            onClick: function(){} // Callback after click
+            }).showToast();    
+            // document.getElementById("error-message").innerText = errorMessages[Math.floor(Math.random() * (errorMessages.length - 1 - 0) + 0)];
         }
 
-        function updateButtonState() {
+        function updateButtonState(hasUpdated) {
+            if (hasUpdated == undefined) {
+                hasUpdated = false;
+            }
+
             const url = new URL(window.location.href);
             let data = localStorage.getItem("pinnedRecipes");
             if (data == null) {
@@ -202,8 +402,36 @@
             });
 
             if (found) {
+                if (hasUpdated) {
+                    Toastify({
+                        text: "Recipe Pinned!",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "right", // `left`, `center` or `right`
+                        stopOnFocus: true, // Prevents dismissing of toast on hover
+                        style: {
+                            background: "linear-gradient(to right, #00b09b, #96c93d)",
+                        },
+                        onClick: function(){} // Callback after click
+                    }).showToast();
+                }
                 document.getElementById("pinbutton").innerText = "Unpin";
             } else {
+                if (hasUpdated) {
+                    Toastify({
+                        text: "Recipe Unpinned!",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "right", // `left`, `center` or `right`
+                        stopOnFocus: true, // Prevents dismissing of toast on hover
+                        style: {
+                            background: "linear-gradient(to right, #00b09b, #96c93d)",
+                        },
+                        onClick: function(){} // Callback after click
+                    }).showToast();
+                }
                 document.getElementById("pinbutton").innerText = "Pin";
             }
         }
@@ -255,7 +483,8 @@
             
             localStorage.setItem("pinnedRecipes", JSON.stringify(jsonDataRecipe));
 
-            updateButtonState();
+
+            updateButtonState(true);
 
         }
 
@@ -278,16 +507,13 @@
                     // Reset error count on successful fetch
                     errorCount = 0;
                     
-                    if (jsonData.success == true) {
-                        document.getElementById("error-message").classList.remove("visible");
-                    }  else {
-                        if (retries == MAX_RETRIES) {
-                            document.getElementById("error-message").classList.add("visible");
+                    if (jsonData.success == false) {
+                        if (retries == MAX_RETRIES) {        
                             randomizeErrorMessage();
                         } else if (retries > MAX_RETRIES) return;
                         retries += 1;
                     
-                    }
+                    } 
 
                     // Update title if not empty
                     const title = jsonData.data.title?.trim();
@@ -313,6 +539,18 @@
                     // Check if recipe is complete
                     if (jsonData.data.is_complete) {
                         isComplete = true;
+                        Toastify({
+                            text: "Recipe has loaded!",
+                            duration: 1500,
+                            close: true,
+                            gravity: "top", // `top` or `bottom`
+                            position: "right", // `left`, `center` or `right`
+                            stopOnFocus: true, // Prevents dismissing of toast on hover
+                            style: {
+                                background: "linear-gradient(to right, #00b09b, #96c93d)",
+                            },
+                            onClick: function(){} // Callback after click
+                        }).showToast();
                         document.querySelector('.recipe-container').classList.add('complete');
                     }
                 })
@@ -321,8 +559,20 @@
                     errorCount++;
                     
                     if (errorCount >= MAX_RETRIES) {
-                        document.getElementById("error-message").classList.add("visible");
-                        document.getElementById("recipe-title").innerHTML = 'Failed to Load <span style="color: #e74c3c;">⚠️</span>';
+                        // document.getElementById("error-message").classList.add("visible");
+                        // document.getElementById("recipe-title").innerHTML = 'Failed to Load <span style="color: #e74c3c;">⚠️</span>';
+                        Toastify({
+                            text: "",
+                            duration: 1500,
+                            close: true,
+                            gravity: "top", // `top` or `bottom`
+                            position: "right", // `left`, `center` or `right`
+                            stopOnFocus: true, // Prevents dismissing of toast on hover
+                            style: {
+                                background: "linear-gradient(to right, #FF0000, #FF2525)",
+                            },
+                            onClick: function(){} // Callback after click
+                        }).showToast();
                         isComplete = true; // Stop trying to fetch
                     }
                 });

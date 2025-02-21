@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <title>Pinned Recipes</title>
     <style>
         body {
@@ -165,13 +170,39 @@
 
             if (jsonData.list.length == 0) {   
                 document.getElementById("user_notification_message").innerText = "No pinned recipes found! Pin a recipe and find them here!";
-
+                Toastify({
+                        text: "No Pinned Recipes Found",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "right", // `left`, `center` or `right`
+                        stopOnFocus: true, // Prevents dismissing of toast on hover
+                        style: {
+                            background: "linear-gradient(to right, #ff0000, #ff1212)",
+                        },
+                    onClick: function(){} // Callback after click
+                }).showToast();
             } else {
+                Toastify({
+                        text: "Loaded Pinned Recipes",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "right", // `left`, `center` or `right`
+                        stopOnFocus: true, // Prevents dismissing of toast on hover
+                        style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    },
+                    onClick: function(){} // Callback after click
+                }).showToast();
+
                 jsonData.list.forEach(element => {
                     createBox(element.name);
                     recipeDataIndex.push(element.id);     
                 });
             }
+
+
 
         }
 

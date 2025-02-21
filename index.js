@@ -59,6 +59,19 @@ app.get("/api/recipe/list", (req, res) => {
     })
 })
 
+app.post("/api/recipe/edit_name", (req, res) => {
+    RecipeGeneration.EditRecipeName(req.body.id, req.body.name).then(resp => {
+        TotalIndex.EditTitleInList(req.body.id, req.body.name).then(resp => {
+            return res.status(200).send(resp);
+        }).catch(err => {
+            return res.status(500).send(err);
+        })
+    }).catch(err => {
+        return res.status(500).send(err);
+    })
+})
+
+
 
 app.get("/recipe/approval", (req, res) => {
     return res.status(200).sendFile(__dirname + "/server/pages/approval.html");
