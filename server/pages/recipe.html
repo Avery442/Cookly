@@ -133,6 +133,15 @@
             background-color: #4caf50;
             color: white;
         }
+
+        .followup-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #4168d3;
+            color: white;
+        }
+
         .pin-icon {
             width: 16px;
             height: 16px;
@@ -153,10 +162,18 @@
         </div>
         <p id="recipe-content" class="loading-content">Loading...</p>
 
+
         <!-- Button Section -->
         <div class="button-section">
             <button class="button pin-button" id="pinbutton" onclick="pinCurRecipe()">
                 Loading...
+            </button>
+        </div>
+
+        <!-- Button Section -->
+        <div class="button-section">
+            <button class="button followup-button" id="pinbutton" onclick="jumpToFollowUps()">
+                Follow Up with Cookly
             </button>
         </div>
 
@@ -167,8 +184,30 @@
                 Change Name
             </button>
         </div>
+
     </div>
 
+    <script>
+
+        function jumpToFollowUps() {
+            const url = new URL(window.location.href);
+
+            Toastify({
+                        text: "Sending you to follow ups",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: "linear-gradient(to right, #CCFFCC, #25FF25)",
+                        },
+                        onClick: function() {}
+            }).showToast();
+
+            window.location.href = "/follow-ups?id=" + url.searchParams.get("id");
+        }
+    </script>
 
     <script>
         const url = new URL(window.location.href);
@@ -192,7 +231,18 @@
                     }
                 })
                 .catch(err => {
-                    // ONE MIN
+                    Toastify({
+                        text: "Error fetching TOS.",
+                        duration: 1500,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                        },
+                        onClick: function() {}
+                    }).showToast();
                 });
         }
     </script>
@@ -203,6 +253,8 @@
         let isComplete = false;
         let isLoaded = false;
         let errorCount = 0;
+
+        let imageList = []
 
         let waitTimeBeforeLoop = 1500;
 
@@ -566,6 +618,9 @@
                     // Check if recipe is complete
                     if (jsonData.data.is_complete) {
                         isComplete = true;
+                        if (jsonData.images != undefined) {
+                            imageList = jsonData.images;
+                        }
                         Toastify({
                             text: "Recipe has loaded!",
                             duration: 1500,

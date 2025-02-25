@@ -40,6 +40,14 @@ app.get("/api/client", (req, res) => {
 })
 
 
+app.post("/api/followup", (req, res) => {
+    require('./src/recipes/RecipeFollowUp').AskFollowUp(req.body.messages).then(result => {
+        return res.status(200).send(result);
+    }).catch(err => {
+        return res.status(500).send(err);
+    });
+})
+
 app.get("/api/recipe/read", (req, res) => {
     RecipeReader.ReadRecipe(req.query.id).then(msg => {
         return res.status(200).send(msg);
@@ -113,6 +121,9 @@ app.get("/recipe", (req, res) => {
     return res.status(200).sendFile(__dirname + "/server/pages/recipe.html");
 })
 
+app.get("/follow-ups", (req, res) => {
+    return res.status(200).sendFile(__dirname + "/server/pages/follow_up.html");
+})
 app.get("/", (req, res) => {
     return res.status(200).sendFile(__dirname + "/server/pages/index.html");
 })

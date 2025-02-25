@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <title>Cookly - Follow Ups</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .recipe-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem 3rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards;
+        }
+        .input-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out 1s forwards;
+        }
+        .input-container input {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: 100%;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .input-container input:focus {
+            border-color: #4caf50;
+            outline: none;
+        }
+        .input-container button {
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+        .input-container button:hover {
+            transform: scale(1.05);
+        }
+        .response-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-top: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .response-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none; /* Initially hidden */
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .loading-content {
+            color: #aaa;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .toastify {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="recipe-container">
+        <h1 id="recipe-title">Let us cook!</h1>
+        <p id="recipe-content" class="loading-content">Loading your recipe...</p>
+    </div>
+    <div class="input-container">
+        <input type="text" id="user-input" placeholder="Ask a follow-up...">
+        <button onclick="sendFollowUp()">Send</button>
+    </div>
+    <div class="response-container" id="response-container">
+        <h3 id="ai-response-title">Here you go!</h3>
+        <p id="ai-response">Waiting for your question...</p>
+    </div>
+    <script>
+        const url = new URL(window.location.href);
+        const id = url.searchParams.get('id');
+
+        let recipeTitle = '';
+        let recipeContent = '';
+
+        let isProcessing;
+
+        fetch("/api/recipe/read?id=" + id)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(res.text());
+                }
+                return res.text();
+            })
+            .then(data => {
+                const jsonData = JSON.parse(data);
+                recipeTitle = jsonData.data.title?.trim();
+                recipeContent = jsonData.data.content?.trim();
+                
+                if (recipeTitle) {
+                    document.getElementById("recipe-title").innerText = recipeTitle;
+                }
+                if (recipeContent) {
+                    const contentElement = document.getElementById("recipe-content");
+                    contentElement.innerText = recipeContent;
+                    contentElement.classList.remove("loading-content");
+                }
+
+                Toastify({
+                    text: "Recipe has loaded!",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    }
+                }).showToast();
+            })
+            .catch(error => {
+                console.error('Error loading recipe:', error);
+                Toastify({
+                    text: "Error loading recipe",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                    }
+                }).showToast();
+            });
+
+        function sendFollowUp() {
+            if (isProcessing) {
+                Toastify({
+                    text: "A follow up is already in progress. Please wait to try again.",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                    }
+                }).showToast();
+                return;
+            }
+
+            const userInput = document.getElementById("user-input").value;
+            if (!userInput.trim()) {
+                Toastify({
+                    text: "Please enter a question.",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                    }
+                }).showToast();
+                return;
+            }
+
+            document.getElementById("ai-response").innerText = "Thinking...";
+
+            // Show the loader animation
+            document.getElementById("response-container").classList.remove("show");
+
+            const followUpData = {
+                messages: [
+                    {
+                        role: "assistant",
+                        content: `${recipeTitle} ${recipeContent}`
+                    },
+                    {
+                        role: "user",
+                        content: userInput
+                    }
+                ]
+            };
+
+            Toastify({
+                                text: "Following up with Cookly.",
+                                duration: 2500,
+                                close: true,
+                                gravity: "top", // `top` or `bottom`
+                                position: "right", // `left`, `center` or `right`
+                                stopOnFocus: true, // Prevents dismissing of toast on hover
+                                style: {
+                                    background: "linear-gradient(to right, #2525FF, #22CCFF)",
+                                },
+                                onClick: function(){} // Callback after click
+            }).showToast();   
+
+            isProcessing = true;
+
+            fetch('/api/followup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(followUpData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("ai-response").innerText = data.response_content;
+                document.getElementById("ai-response-title").innerText = data.response_title;
+                document.getElementById("response-container").classList.add("show");
+
+                Toastify({
+                    text: "Follow-up sent and response received!",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    }
+                }).showToast();
+
+                isProcessing = false;
+            })
+            .catch(error => {
+                console.error('Error sending follow-up request:', error);
+                Toastify({
+                    text: "Error sending follow-up request",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #ff6b6b, #ff4757)",
+                    }
+                }).showToast();
+            });
+        }
+    </script>
+</body>
+</html>

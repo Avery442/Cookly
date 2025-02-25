@@ -10,7 +10,30 @@ const defaultRecipeJson = {
     "title" : "",
     "content" : "",
     "slogan" : "",
+    "images" : [],
     "is_complete" : false
+}
+
+function AppendImage(imageId, recipeId) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(dirname + "/server/recipes/" + recipeId + ".json", (err, data) => {
+            if (err) {
+                reject(err.message);      
+            } else {
+                let jsonData = JSON.parse(data);
+
+                jsonData.images.push(imageId);
+
+                fs.writeFile(dirname + "/server/recipes/" + recipeId + ".json", (err) => {
+                    if (err) {
+                        reject(err.message);
+                    } else {
+                        resolve("Success");
+                    }
+                })
+            }
+        })
+    })
 }
 
 function CreateRecipe(prompt) {
