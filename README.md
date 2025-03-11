@@ -1,19 +1,11 @@
-# Cookly
+# Cookly Website
 
-Cookly is an Web App designed to prove that AI can be helpful in the kitchen. 
+Cookly is an open source webserver that you can host in cooperation with Ollama to create recipes using AI. This project was made using Node JS, HTML, CSS and Regular Javascript. 
+Nothing is really special about this page and web design was cooperated with AI to help create colour palletes.
 
-## What can Cookly do?
+## Disclaimer
 
-Cookly can connect to your Ollama server and be able to generate recipes using Artificial Intelligence. 
-
-## Why Cookly?
-
-You can use Cookly to finally remove that chicken that is almost expired or use Cookly to experiment what chef's call acceptable! I aspire to improve the Cookly program to achieve the goal of having AI in the kitchen standing side by side with you.
-
-## Social with Cookly?
-
-I plan on adding social features such as taking photos of the recipes you have successfully made with Cookly.
-
-## Moderation
-
-TODO: Add the ability to moderate the Cookly instance.
+When hosting, using or communicating with this app in anyway, I accept ZERO responability to what happens, including but not limited to:
+  - Death,
+  - Injury,
+  - Generic Illness related to food.
